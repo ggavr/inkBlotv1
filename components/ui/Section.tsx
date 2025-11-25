@@ -8,6 +8,7 @@ interface SectionProps {
   containerSize?: 'default' | 'narrow' | 'wide'
   withBorder?: boolean
   background?: 'paper' | 'white' | 'grey'
+  id?: string
 }
 
 export function Section({ 
@@ -15,10 +16,12 @@ export function Section({
   className, 
   containerSize = 'default',
   withBorder = false,
-  background = 'paper'
+  background = 'paper',
+  id
 }: SectionProps) {
   return (
     <section
+      id={id}
       className={clsx(
         'py-16 md:py-24 lg:py-32',
         {
