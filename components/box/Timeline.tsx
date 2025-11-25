@@ -30,7 +30,7 @@ export function Timeline() {
         <div className="text-center mb-12">
           <h2 className="mb-4">Timeline & Cut-off</h2>
           <p className="text-lg text-ink-800">
-            Here's what to expect when you subscribe
+            Here&apos;s what to expect when you subscribe
           </p>
         </div>
 
