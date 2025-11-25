@@ -13,12 +13,12 @@ export function Hero() {
           Discover hidden gems from independent romance authors. Every quarter, 
           receive curated books, bookish goodies, and exclusive digital content.
         </p>
-        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-6">
-          <Button asChild size="lg">
-            <Link href="/box">Subscribe Now</Link>
+        <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-6">
+          <Button asChild size="lg" className="px-12 py-5 text-xl">
+            <Link href="/box">Subscribe</Link>
           </Button>
-          <Button asChild size="lg" variant="outline">
-            <Link href="/box#whats-included">See What&apos;s in the Box</Link>
+          <Button asChild size="lg" variant="outline" className="px-10 py-5 text-lg">
+            <Link href="/community/login">Log-In to Community</Link>
           </Button>
         </div>
         <p className="text-sm text-grey-500">

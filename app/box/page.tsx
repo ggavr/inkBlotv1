@@ -1,4 +1,5 @@
 import { BoxHero } from '@/components/box/BoxHero'
+import { SneakPeak } from '@/components/box/SneakPeak'
 import { Plans } from '@/components/box/Plans'
 import { WhatYouGet } from '@/components/box/WhatYouGet'
 import { ShippingInfo } from '@/components/box/ShippingInfo'
@@ -15,6 +16,7 @@ export default function BoxPage() {
   return (
     <>
       <BoxHero />
+      <SneakPeak />
       <Plans />
       <WhatYouGet />
       <ShippingInfo />

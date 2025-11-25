@@ -18,11 +18,6 @@ export function WhatsInTheBox() {
       title: 'Digital Extras',
       description: 'Exclusive Spotify playlists, recorded author Q&As, and downloadable content for each box.',
     },
-    {
-      icon: '💬',
-      title: 'Community Access',
-      description: 'Join our book club discussions, connect with fellow readers, and participate in live events.',
-    },
   ]
 
   return (
@@ -34,7 +29,7 @@ export function WhatsInTheBox() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
         {inclusions.map((item) => (
           <Card key={item.title} className="p-8" hoverable>
             <div className="text-5xl mb-4">{item.icon}</div>

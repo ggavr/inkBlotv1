@@ -28,7 +28,9 @@ export function BoxHero() {
             ) : (
               <Button size="lg">Join Waitlist</Button>
             )}
-            <Button size="lg" variant="outline">Learn More</Button>
+            <Button size="lg" variant="outline" asChild>
+              <a href="#sneak-peak">Sneak peak</a>
+            </Button>
           </div>
           <div className="text-sm text-grey-600">
             <p className="mb-1">
