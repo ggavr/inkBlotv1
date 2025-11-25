@@ -6,7 +6,7 @@ import Link from 'next/link'
 
 export function CartContent() {
   // Mock cart data - in production, fetch from Shopify
-  const cartItems = []
+  const cartItems: any[] = []
   const subtotal = '£0.00'
   const isEmpty = cartItems.length === 0
 
