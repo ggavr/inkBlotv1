@@ -7,6 +7,7 @@ export function Footer() {
 
   const mainLinks = [
     { href: '/box', label: 'Box' },
+    { href: '/library', label: 'Library' },
     { href: '/shop', label: 'Shop' },
     { href: '/community', label: 'Community' },
     { href: '/publishers', label: 'For Publishers' },
