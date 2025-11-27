@@ -33,7 +33,7 @@ export function LibraryWaitlist() {
               </Button>
            </form>
            <p className="text-xs text-ink-500 mt-4">
-             We'll notify you when we launch in your region.
+             We&apos;ll notify you when we launch in your region.
            </p>
         </div>
       </div>
