@@ -30,7 +30,7 @@ const config: Config = {
       },
       fontFamily: {
         'serif': ['var(--font-playfair)', 'Playfair Display', 'Georgia', 'serif'],
-        'sans': ['var(--font-inter)', 'Inter', 'system-ui', 'sans-serif'],
+        'sans': ['var(--font-playfair)', 'Playfair Display', 'system-ui', 'sans-serif'],
       },
       spacing: {
         '18': '4.5rem',
