@@ -1,11 +1,11 @@
 'use client'
 
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 import Link from 'next/link'
 import { Button } from '@/components/ui/Button'
 import { RegionSelector } from '@/components/RegionSelector'
-import clsx from 'clsx'
-import { navLinks, hasChildren, getNavKey, getSubmenuId } from './navLinks'
+import { navLinks, hasChildren, getNavKey } from './navLinks'
 import type { NavLink, NavChild } from './navLinks'
 
 interface MobileMenuProps {
@@ -13,62 +13,47 @@ interface MobileMenuProps {
   onClose: () => void
 }
 
-// Collapsible submenu with smooth height transition
+// Collapsible submenu
 function MobileSubmenu({
   link,
-  isOpen,
+  isExpanded,
   onToggle,
-  onClose,
+  onNavigate,
 }: {
   link: NavLink & { children: NavChild[] }
-  isOpen: boolean
+  isExpanded: boolean
   onToggle: () => void
-  onClose: () => void
+  onNavigate: () => void
 }) {
-  const contentRef = useRef<HTMLDivElement>(null)
-  const [contentHeight, setContentHeight] = useState(0)
-  const submenuId = getSubmenuId(link.label)
-
-  useEffect(() => {
-    if (contentRef.current) {
-      setContentHeight(contentRef.current.scrollHeight)
-    }
-  }, [link.children])
-
   return (
-    <div className="flex flex-col">
+    <div>
       <button
         type="button"
-        aria-expanded={isOpen}
-        aria-controls={submenuId}
         onClick={onToggle}
-        className="flex items-center justify-between text-lg font-serif hover:text-ink-700 transition-colors py-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-ink-900/20 rounded"
+        className="w-full flex items-center justify-between text-xl font-serif py-3 text-ink-900 active:text-ink-700"
+        aria-expanded={isExpanded}
       >
         <span>{link.label}</span>
         <svg
-          className={clsx('w-5 h-5 text-ink-700 transition-transform duration-300', isOpen && 'rotate-180')}
-          viewBox="0 0 20 20"
-          fill="currentColor"
-          aria-hidden="true"
+          className={`w-5 h-5 text-ink-600 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
         >
-          <path d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.06l3.71-3.83a.75.75 0 0 1 1.08 1.04l-4.25 4.39a.75.75 0 0 1-1.08 0L5.21 8.27a.75.75 0 0 1 .02-1.06Z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
         </svg>
-        <span className="sr-only">Toggle {link.label} menu</span>
       </button>
 
       <div
-        id={submenuId}
-        className="overflow-hidden transition-[max-height] duration-300 ease-in-out"
-        style={{ maxHeight: isOpen ? contentHeight : 0 }}
+        className={`overflow-hidden transition-all duration-200 ${isExpanded ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0'}`}
       >
-        <div ref={contentRef} className="flex flex-col gap-2 pl-4 border-l border-ink-900/10 py-2">
+        <div className="pl-4 pb-2 space-y-1 border-l-2 border-ink-200 ml-2">
           {link.children.map((child) => (
             <Link
               key={child.href}
               href={child.href}
-              onClick={onClose}
-              tabIndex={isOpen ? 0 : -1}
-              className="text-base font-serif text-ink-800 hover:text-ink-700 transition-colors py-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-ink-900/20 rounded"
+              onClick={onNavigate}
+              className="block text-lg font-serif py-2 text-ink-700 active:text-ink-900"
             >
               {child.label}
             </Link>
@@ -79,176 +64,141 @@ function MobileSubmenu({
   )
 }
 
-// Simple mobile nav link
-function MobileNavLink({ link, onClose }: { link: NavLink & { href: string }; onClose: () => void }) {
-  return (
-    <Link
-      href={link.href}
-      onClick={onClose}
-      className="text-lg font-serif hover:text-ink-700 transition-colors py-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-ink-900/20 rounded"
-    >
-      {link.label}
-    </Link>
-  )
-}
+function MobileMenuContent({ isOpen, onClose }: MobileMenuProps) {
+  const [expandedItem, setExpandedItem] = useState<string | null>(null)
 
-export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
-  const [openDropdown, setOpenDropdown] = useState<string | null>(null)
-  const menuRef = useRef<HTMLDivElement>(null)
-  const firstFocusableRef = useRef<HTMLAnchorElement>(null)
-
-  const toggleDropdown = useCallback((label: string) => {
-    setOpenDropdown((current) => (current === label ? null : label))
-  }, [])
-
-  // Reset dropdown state when menu closes
+  // Reset expanded state when menu closes
   useEffect(() => {
     if (!isOpen) {
-      setOpenDropdown(null)
+      setExpandedItem(null)
     }
   }, [isOpen])
 
-  // Lock body scroll when menu is open
+  // Lock body scroll
   useEffect(() => {
     if (isOpen) {
       const scrollY = window.scrollY
+      document.body.style.overflow = 'hidden'
       document.body.style.position = 'fixed'
       document.body.style.top = `-${scrollY}px`
-      document.body.style.left = '0'
-      document.body.style.right = '0'
-      document.body.style.overflow = 'hidden'
+      document.body.style.width = '100%'
 
       return () => {
+        document.body.style.overflow = ''
         document.body.style.position = ''
         document.body.style.top = ''
-        document.body.style.left = ''
-        document.body.style.right = ''
-        document.body.style.overflow = ''
+        document.body.style.width = ''
         window.scrollTo(0, scrollY)
       }
     }
   }, [isOpen])
 
-  // Focus trap and keyboard handling
+  // Close on escape
   useEffect(() => {
-    if (!isOpen || !menuRef.current) return
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
         onClose()
-        return
-      }
-
-      // Focus trap
-      if (e.key === 'Tab') {
-        const focusableElements = menuRef.current?.querySelectorAll<HTMLElement>(
-          'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
-        )
-        if (!focusableElements?.length) return
-
-        const firstEl = focusableElements[0]
-        const lastEl = focusableElements[focusableElements.length - 1]
-
-        if (e.shiftKey && document.activeElement === firstEl) {
-          e.preventDefault()
-          lastEl.focus()
-        } else if (!e.shiftKey && document.activeElement === lastEl) {
-          e.preventDefault()
-          firstEl.focus()
-        }
       }
     }
-
-    document.addEventListener('keydown', handleKeyDown)
-    return () => document.removeEventListener('keydown', handleKeyDown)
+    document.addEventListener('keydown', handleEscape)
+    return () => document.removeEventListener('keydown', handleEscape)
   }, [isOpen, onClose])
 
-  // Focus first item when menu opens
-  useEffect(() => {
-    if (isOpen && firstFocusableRef.current) {
-      // Small delay to let transition start
-      const timer = setTimeout(() => {
-        firstFocusableRef.current?.focus()
-      }, 100)
-      return () => clearTimeout(timer)
-    }
-  }, [isOpen])
-
-  // Build nav items, capturing ref for first focusable
-  let isFirstLink = true
-  const navItems = navLinks.map((link) => {
-    if (hasChildren(link)) {
-      return (
-        <MobileSubmenu
-          key={getNavKey(link)}
-          link={link}
-          isOpen={openDropdown === link.label}
-          onToggle={() => toggleDropdown(link.label)}
-          onClose={onClose}
-        />
-      )
-    }
-
-    if (!link.href) {
-      return null
-    }
-
-    const linkWithHref = link as NavLink & { href: string }
-
-    // Capture first link ref
-    if (isFirstLink) {
-      isFirstLink = false
-      return (
-        <Link
-          key={getNavKey(link)}
-          ref={firstFocusableRef}
-          href={linkWithHref.href}
-          onClick={onClose}
-          className="text-lg font-serif hover:text-ink-700 transition-colors py-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-ink-900/20 rounded"
-        >
-          {linkWithHref.label}
-        </Link>
-      )
-    }
-
-    return <MobileNavLink key={getNavKey(link)} link={linkWithHref} onClose={onClose} />
-  })
+  const toggleSubmenu = useCallback((label: string) => {
+    setExpandedItem((prev) => (prev === label ? null : label))
+  }, [])
 
   return (
-    <div
-      ref={menuRef}
-      role="dialog"
-      aria-modal="true"
-      aria-label="Mobile navigation menu"
-      className={clsx(
-        'lg:hidden fixed inset-0 bg-paper-50 z-[60] transition-transform duration-300 ease-out',
-        isOpen ? 'translate-x-0' : 'translate-x-full'
-      )}
-    >
-      {/* Close button */}
-      <button
-        type="button"
+    <>
+      {/* Backdrop */}
+      <div
+        className={`fixed inset-0 bg-black/40 z-[100] transition-opacity duration-300 ${
+          isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        }`}
         onClick={onClose}
-        className="absolute top-6 right-6 p-2 text-ink-900 hover:text-ink-700 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ink-900/20 rounded"
-        aria-label="Close menu"
+        aria-hidden="true"
+      />
+
+      {/* Menu Panel */}
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Navigation menu"
+        className={`fixed top-0 right-0 bottom-0 w-full max-w-sm bg-paper-50 z-[101] shadow-2xl transform transition-transform duration-300 ease-out ${
+          isOpen ? 'translate-x-0' : 'translate-x-full'
+        }`}
       >
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-        </svg>
-      </button>
-
-      <nav className="flex h-full flex-col space-y-4 overflow-y-auto px-6 pb-10 pt-24" aria-label="Mobile navigation">
-        {navItems}
-
-        <div className="pt-6 mt-auto border-t border-ink-900/10">
-          <Button asChild fullWidth className="mb-4">
-            <Link href="/box" onClick={onClose}>
-              Subscribe
-            </Link>
-          </Button>
-          <RegionSelector />
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-5 border-b border-ink-100">
+          <span className="font-serif text-xl">Menu</span>
+          <button
+            type="button"
+            onClick={onClose}
+            className="p-2 -mr-2 text-ink-900 hover:text-ink-600 active:text-ink-600"
+            aria-label="Close menu"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
         </div>
-      </nav>
-    </div>
+
+        {/* Navigation */}
+        <nav className="flex flex-col h-[calc(100%-73px)] overflow-y-auto">
+          <div className="flex-1 px-6 py-4 space-y-1">
+            {navLinks.map((link) => {
+              if (hasChildren(link)) {
+                return (
+                  <MobileSubmenu
+                    key={getNavKey(link)}
+                    link={link}
+                    isExpanded={expandedItem === link.label}
+                    onToggle={() => toggleSubmenu(link.label)}
+                    onNavigate={onClose}
+                  />
+                )
+              }
+
+              if (!link.href) return null
+
+              return (
+                <Link
+                  key={getNavKey(link)}
+                  href={link.href}
+                  onClick={onClose}
+                  className="block text-xl font-serif py-3 text-ink-900 active:text-ink-700"
+                >
+                  {link.label}
+                </Link>
+              )
+            })}
+          </div>
+
+          {/* Footer */}
+          <div className="px-6 py-6 border-t border-ink-100 mt-auto">
+            <Button asChild fullWidth className="mb-4">
+              <Link href="/box" onClick={onClose}>
+                Subscribe Now
+              </Link>
+            </Button>
+            <RegionSelector />
+          </div>
+        </nav>
+      </div>
+    </>
   )
+}
+
+export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  // Don't render on server or before mount
+  if (!mounted) return null
+
+  // Render via portal to document.body to escape header stacking context
+  return createPortal(<MobileMenuContent isOpen={isOpen} onClose={onClose} />, document.body)
 }
