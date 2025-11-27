@@ -221,10 +221,22 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
       aria-modal="true"
       aria-label="Mobile navigation menu"
       className={clsx(
-        'lg:hidden fixed inset-0 bg-paper-50 z-40 transition-transform duration-300 ease-out',
+        'lg:hidden fixed inset-0 bg-paper-50 z-[60] transition-transform duration-300 ease-out',
         isOpen ? 'translate-x-0' : 'translate-x-full'
       )}
     >
+      {/* Close button */}
+      <button
+        type="button"
+        onClick={onClose}
+        className="absolute top-6 right-6 p-2 text-ink-900 hover:text-ink-700 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ink-900/20 rounded"
+        aria-label="Close menu"
+      >
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+
       <nav className="flex h-full flex-col space-y-4 overflow-y-auto px-6 pb-10 pt-24" aria-label="Mobile navigation">
         {navItems}
 

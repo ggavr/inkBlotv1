@@ -43,8 +43,8 @@ export function Community() {
         ))}
       </div>
 
-      <div className="text-center">
-        <Button asChild size="lg" variant="outline">
+      <div className="text-center px-4 sm:px-0">
+        <Button asChild size="lg" variant="outline" className="w-full sm:w-auto">
           <Link href="/community">Learn More About Community</Link>
         </Button>
       </div>

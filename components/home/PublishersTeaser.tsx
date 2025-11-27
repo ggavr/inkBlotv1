@@ -25,9 +25,11 @@ export function PublishersTeaser() {
             <p className="text-sm text-ink-800">Engaged BookTok/IG audience</p>
           </div>
         </div>
-        <Button asChild size="lg">
-          <Link href="/publishers">Learn More</Link>
-        </Button>
+        <div className="px-4 sm:px-0">
+          <Button asChild size="lg" className="w-full sm:w-auto">
+            <Link href="/publishers">Learn More</Link>
+          </Button>
+        </div>
       </div>
     </Section>
   )

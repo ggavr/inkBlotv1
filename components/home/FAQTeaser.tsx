@@ -38,8 +38,8 @@ export function FAQTeaser() {
           ))}
         </Accordion>
 
-        <div className="text-center mt-12">
-          <Button asChild variant="outline" size="lg">
+        <div className="text-center mt-12 px-4 sm:px-0">
+          <Button asChild variant="outline" size="lg" className="w-full sm:w-auto">
             <Link href="/faq">View All FAQs</Link>
           </Button>
         </div>
