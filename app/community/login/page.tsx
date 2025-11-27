@@ -20,7 +20,7 @@ export default function CommunityLoginPage() {
           <div className="space-y-4">
             <Button asChild fullWidth size="lg">
               <a 
-                href="https://discord.com" 
+                href="https://discord.com/channels/1442556988163751970/1442559941918326939" 
                 target="_blank" 
                 rel="noopener noreferrer"
               >
