@@ -20,7 +20,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             .from('profiles')
             .select('*')
             .eq('id', user.id)
-            .single()
+            .maybeSingle()
 
           const authUser = transformToAuthUser(user, profile)
           setUser(authUser)
@@ -42,27 +42,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        if (event === 'SIGNED_IN' && session?.user) {
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', session.user.id)
-            .single()
+        try {
+          if (event === 'SIGNED_IN' && session?.user) {
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('*')
+              .eq('id', session.user.id)
+              .maybeSingle()
 
-          const authUser = transformToAuthUser(session.user, profile)
-          setUser(authUser)
-        } else if (event === 'SIGNED_OUT') {
-          setUser(null)
-        } else if (event === 'TOKEN_REFRESHED' && session?.user) {
-          // Refresh user data on token refresh
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', session.user.id)
-            .single()
+            const authUser = transformToAuthUser(session.user, profile)
+            setUser(authUser)
+          } else if (event === 'SIGNED_OUT') {
+            setUser(null)
+          } else if (event === 'TOKEN_REFRESHED' && session?.user) {
+            // Refresh user data on token refresh
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('*')
+              .eq('id', session.user.id)
+              .maybeSingle()
 
-          const authUser = transformToAuthUser(session.user, profile)
-          setUser(authUser)
+            const authUser = transformToAuthUser(session.user, profile)
+            setUser(authUser)
+          }
+        } catch (error) {
+          console.error('Auth state change error:', error)
         }
       }
     )
