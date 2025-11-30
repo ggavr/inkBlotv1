@@ -8,7 +8,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { setUser, setInitialized, isInitialized } = useAuthStore()
 
   useEffect(() => {
-    const supabase = createClient()
+    let supabase: ReturnType<typeof createClient>
+    
+    try {
+      supabase = createClient()
+    } catch (e) {
+      console.error('Failed to create Supabase client:', e)
+      setInitialized(true)
+      return
+    }
 
     // Initial session check
     const initializeAuth = async () => {
