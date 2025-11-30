@@ -4,64 +4,68 @@ import { PROTECTED_ROUTES, AUTH_ROUTES } from '@/lib/auth/constants'
 import type { Profile } from '@/lib/supabase/types'
 
 export async function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl
+  try {
+    const { pathname } = request.nextUrl
 
-  // Update session and get user
-  const { response, user, supabase } = await updateSession(request)
+    // Update session and get user
+    const { response, user, supabase } = await updateSession(request)
 
-  // Check if the current path is a protected route
-  const isProtectedRoute = PROTECTED_ROUTES.some((route) =>
-    pathname.startsWith(route)
-  )
-
-  // Check if the current path is an auth route (login, register, etc.)
-  const isAuthRoute = Object.values(AUTH_ROUTES).some((route) =>
-    pathname.startsWith(route)
-  )
-
-  // If user is not authenticated and trying to access protected route
-  if (isProtectedRoute && !user) {
-    const loginUrl = new URL('/login', request.url)
-    loginUrl.searchParams.set('returnTo', pathname)
-    return NextResponse.redirect(loginUrl)
-  }
-
-  // If user is authenticated and trying to access auth routes (except callback)
-  if (user && isAuthRoute && !pathname.startsWith('/auth/callback')) {
-    // Check if user has completed onboarding
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('onboarding_completed')
-      .eq('id', user.id)
-      .single() as { data: Pick<Profile, 'onboarding_completed'> | null; error: unknown }
-
-    // If onboarding not completed and not on onboarding page, redirect there
-    if ((!profile || !profile.onboarding_completed) && pathname !== '/onboarding') {
-      return NextResponse.redirect(new URL('/onboarding', request.url))
+    if (!supabase) {
+      return response
     }
 
-    // If onboarding completed and on auth page, redirect to account
-    if (profile?.onboarding_completed && pathname !== '/onboarding') {
-      return NextResponse.redirect(new URL('/account', request.url))
+    // Check if the current path is a protected route
+    const isProtectedRoute = PROTECTED_ROUTES.some((route) =>
+      pathname.startsWith(route)
+    )
+
+    // Check if the current path is an auth route (login, register, etc.)
+    const isAuthRoute = Object.values(AUTH_ROUTES).some((route) =>
+      pathname.startsWith(route)
+    )
+
+    // If user is not authenticated and trying to access protected route
+    if (isProtectedRoute && !user) {
+      const loginUrl = new URL('/login', request.url)
+      loginUrl.searchParams.set('returnTo', pathname)
+      return NextResponse.redirect(loginUrl)
     }
-  }
 
-  // If user is authenticated but hasn't completed onboarding
-  if (user && isProtectedRoute && pathname !== '/onboarding') {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('onboarding_completed')
-      .eq('id', user.id)
-      .single() as { data: Pick<Profile, 'onboarding_completed'> | null; error: unknown }
+    // If user is authenticated, check onboarding status
+    if (user && (isAuthRoute || isProtectedRoute) && !pathname.startsWith('/auth/callback')) {
+      // We only need to check profile if we are on an auth route or protected route
+      // Use maybeSingle() instead of single() to avoid errors if no row exists
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('onboarding_completed')
+        .eq('id', user.id)
+        .maybeSingle() as { data: Pick<Profile, 'onboarding_completed'> | null; error: unknown }
 
-    if (!profile || !profile.onboarding_completed) {
-      const onboardingUrl = new URL('/onboarding', request.url)
-      onboardingUrl.searchParams.set('returnTo', pathname)
-      return NextResponse.redirect(onboardingUrl)
+      const isOnboarding = pathname === '/onboarding'
+      const hasCompletedOnboarding = profile?.onboarding_completed
+
+      // If onboarding not completed and not on onboarding page, redirect there
+      if (!hasCompletedOnboarding && !isOnboarding) {
+        const onboardingUrl = new URL('/onboarding', request.url)
+        onboardingUrl.searchParams.set('returnTo', pathname)
+        return NextResponse.redirect(onboardingUrl)
+      }
+
+      // If onboarding completed and on auth page (e.g. login/register), redirect to account
+      if (hasCompletedOnboarding && isAuthRoute && !isOnboarding) {
+        return NextResponse.redirect(new URL('/account', request.url))
+      }
     }
-  }
 
-  return response
+    return response
+  } catch (e) {
+    console.error('Middleware error:', e)
+    return NextResponse.next({
+      request: {
+        headers: request.headers,
+      },
+    })
+  }
 }
 
 export const config = {
