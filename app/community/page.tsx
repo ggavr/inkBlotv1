@@ -1,7 +1,6 @@
 import { Section } from '@/components/ui/Section'
-import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
-import Link from 'next/link'
+import { DiscordAccess } from '@/components/community/DiscordAccess'
 
 export const metadata = {
   title: 'Community | Inkblot Crew',
@@ -41,11 +40,11 @@ export default function CommunityPage() {
             Reading is better together. Connect with passionate indie romance readers, 
             participate in book club discussions, and get exclusive access to author events.
           </p>
-          <Button asChild size="lg">
-            <Link href="/box">Subscribe to Join</Link>
-          </Button>
         </div>
       </Section>
+
+      {/* Discord Access Section - Auth-gated */}
+      <DiscordAccess />
 
       <Section withBorder background="grey">
         <div className="text-center mb-16">
@@ -92,19 +91,6 @@ export default function CommunityPage() {
               </p>
             </div>
           </div>
-        </div>
-      </Section>
-
-      <Section withBorder background="grey">
-        <div className="max-w-3xl mx-auto text-center">
-          <h2 className="mb-6">Ready to Join?</h2>
-          <p className="text-lg text-ink-800 leading-relaxed mb-8">
-            Community access is included with every Inkblot Crew subscription. 
-            Start connecting with fellow indie romance fans today.
-          </p>
-          <Button asChild size="lg">
-            <Link href="/box">Subscribe Now</Link>
-          </Button>
         </div>
       </Section>
     </>

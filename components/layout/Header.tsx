@@ -6,6 +6,7 @@ import { Container } from '@/components/ui/Container'
 import { Button } from '@/components/ui/Button'
 import { RegionSelector } from '@/components/RegionSelector'
 import { CartButton } from '@/components/cart/CartButton'
+import { UserMenu } from '@/components/auth/UserMenu'
 import { MobileMenu } from './MobileMenu'
 import { navLinks, hasChildren, getNavKey, getSubmenuId } from './navLinks'
 import type { NavLink } from './navLinks'
@@ -181,6 +182,9 @@ export function Header() {
             <Button asChild size="sm" className="hidden lg:inline-flex">
               <Link href="/box">Subscribe</Link>
             </Button>
+            <div className="hidden md:block">
+              <UserMenu />
+            </div>
             <CartButton />
 
             {/* Mobile menu button */}

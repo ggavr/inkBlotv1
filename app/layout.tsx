@@ -5,6 +5,7 @@ import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
 import { CookieConsent } from '@/components/CookieConsent'
 import { GTMScript } from '@/components/analytics/GTMScript'
+import { AuthProvider } from '@/components/auth/AuthProvider'
 
 const playfair = Playfair_Display({ 
   subsets: ['latin'],
@@ -38,12 +39,14 @@ export default function RootLayout({
         <GTMScript />
       </head>
       <body>
-        <Header />
-        <main className="min-h-screen">
-          {children}
-        </main>
-        <Footer />
-        <CookieConsent />
+        <AuthProvider>
+          <Header />
+          <main className="min-h-screen">
+            {children}
+          </main>
+          <Footer />
+          <CookieConsent />
+        </AuthProvider>
       </body>
     </html>
   )
